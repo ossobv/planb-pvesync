@@ -13,7 +13,8 @@ class NoCommonSnapshots(Exception):
 
     def __str__(self):
         return (
-            'No common snapshots found between {left!r} and {right!r}:\n'
+            'No common snapshots found between (src) {left!r} '
+            'and (dst) {right!r}:\n'
             '- {{{left_snaps}}}\nvs\n- {{{right_snaps}}}\n').format(
                 left=self.left, right=self.right,
                 left_snaps='\n- '.join(sorted(self.left_snaps)),

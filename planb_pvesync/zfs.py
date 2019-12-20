@@ -49,6 +49,9 @@ class _FilesystemBase(_SystemCalls):
         assert not zfs_root.endswith('/'), zfs_root
         self._fs_name = zfs_root  # 'tank', or 'tank/enc'
 
+    def __repr__(self):
+        return '<zfs:{}>'.format(self._fs_name)
+
     def descend(self, child_name):
         assert not child_name.startswith('/'), child_name
         assert not child_name.endswith('/'), child_name
