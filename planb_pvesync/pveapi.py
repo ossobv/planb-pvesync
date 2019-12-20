@@ -228,11 +228,16 @@ class PveGuestVolume:
         if storage == 'none' and volume is None:
             storage = None
 
-        self.filestore = self.cluster.get_filestore(storage)
         self.name = volume
         self.info = info
-        self.is_enabled = self.filestore.is_enabled
         self.is_removable = ('media=cdrom' in info.split(','))
+
+        if self.is_removable:
+            self.filestore = self.cluster.get_filestore(None)
+            self.is_enabled = False
+        else:
+            self.filestore = self.cluster.get_filestore(storage)
+            self.is_enabled = self.filestore.is_enabled
 
     def __repr__(self):
         """
