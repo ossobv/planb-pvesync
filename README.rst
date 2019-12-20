@@ -87,6 +87,9 @@ Configuration
 Config ``~/.proxmoxrc`` (similar to Proxmove config)::
 
     [pve:MYCLUSTER]
+    ; The planb@pve user will require a PVEAuditor role: it needs Audit
+    ; access to the Datastore and the VMs. (Underlying disk access is done
+    ; through an ssh side channel.)
     api=https://planb@pve:PASS:cluster.example.com:443
 
       [storage:MYCLUSTER:mc10-5-pve-local-ssd]
