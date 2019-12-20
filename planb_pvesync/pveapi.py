@@ -1,4 +1,8 @@
+import logging
+
 from proxmoxer import ProxmoxAPI
+
+log = logging.getLogger(__name__)
 
 
 class PveCluster:
@@ -177,11 +181,16 @@ class PveGuest:
         api_vm = getattr(self.cluster._api.nodes(self.node), self.type)(
             self.vmid)
         vm_config = api_vm.config.get()
-        boot_disk = vm_config.pop('bootdisk')
-        boot_volume = vm_config.pop(boot_disk)
-        yield PveGuestVolume(
-            self.cluster, guest=self, driver=boot_disk, info=boot_volume,
-            is_boot=True)
+
+        boot_disk = vm_config.pop('bootdisk', None)
+        if boot_disk:
+            boot_volume = vm_config.pop(boot_disk)
+            yield PveGuestVolume(
+                self.cluster, guest=self, driver=boot_disk, info=boot_volume,
+                is_boot=True)
+        else:
+            log.warn('No bootdisk for %s', self)
+
         for key, value in vm_config.items():
             if (key.startswith(('ide', 'sata', 'scsi', 'virtio')) and
                     key[-1].isdigit()):

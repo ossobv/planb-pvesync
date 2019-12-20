@@ -1,10 +1,19 @@
 from argparse import ArgumentParser, ArgumentError, ArgumentTypeError
 from collections import OrderedDict
 from functools import wraps
+import logging
+import sys
 
 from . import pvecommand, pvesync
 from .config import ConfigFile
 
+LOG_COLORED = '\x1b[1;31m{}\x1b[0m'
+LOG_FORMAT = '%(levelname)s: %(message)s'
+LOG_LEVELS = {
+    0: logging.WARNING,
+    1: logging.INFO,
+    2: logging.DEBUG,
+}
 
 PVE_COMMANDS = OrderedDict([
     ('list-pve-hosts', pvecommand.ListHosts),
@@ -48,6 +57,9 @@ class PlanbProxSync:
             '--config', '-f', action='store', metavar='FILENAME',
             type=argparse_type(ConfigFile), default='~/.proxmoxrc')
         parser.add_argument(
+            '-v', '--verbose', action='count', default=0,
+            help='One -v for INFO and -vv for DEBUG')
+        parser.add_argument(
             'command', choices=COMMANDS.keys())
         parser.add_argument(
             '--pve-cluster', '-p', action='store', metavar='CLUSTERNAME')
@@ -57,6 +69,13 @@ class PlanbProxSync:
             '--sync-zfs-root', action='store', metavar='DEST_FILESYSTEM')
         self._parser = parser
         self._args = parser.parse_args()
+
+        logging.basicConfig(
+            level=LOG_LEVELS[min(self._args.verbose, 2)],
+            format=(
+                LOG_COLORED.format(LOG_FORMAT)
+                if sys.stderr.isatty() else LOG_FORMAT))
+
         self._config = self._args.config
         try:
             self._try_command(self._args.command)
