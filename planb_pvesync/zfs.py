@@ -2,6 +2,12 @@ from shlex import quote as shell_quote
 from subprocess import CalledProcessError, check_output
 
 
+# Setting these may help if you have more CPU than bandwidth:
+QUICK_DEFLATE_BIN, QUICK_INFLATE_BIN = 'cat', 'cat'
+# QUICK_DEFLATE_BIN, QUICK_INFLATE_BIN = 'gzip', 'zcat'
+# QUICK_DEFLATE_BIN, QUICK_INFLATE_BIN = 'qlzip1', 'qlzcat1'
+
+
 class ZfsError(CalledProcessError):
     pass
 
@@ -114,13 +120,13 @@ class _FilesystemBase(_SystemCalls):
                 'zfs', 'send', '-i',
                 '{}@{}'.format(self._fs_name, prev_snapshot_name),
                 '{}@{}'.format(self._fs_name, snapshot_name),
-                post_pipe='qlzip1')
+                post_pipe=QUICK_DEFLATE_BIN)  # e.g. gzip
         return self.zfs_command(
             'zfs', 'send', '{}@{}'.format(self._fs_name, snapshot_name),
-            post_pipe='qlzip1')
+            post_pipe=QUICK_DEFLATE_BIN)  # e.g. gzip
 
     def recv_command(self, pre_pipe=None):
-        default_pre_pipe = 'qlzcat1'
+        default_pre_pipe = QUICK_INFLATE_BIN  # e.g. zcat
         if pre_pipe:
             pre_pipe = '{} | {}'.format(default_pre_pipe, pre_pipe)
         else:
