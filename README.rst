@@ -196,3 +196,11 @@ planb-pvesync TODOs
 * CAVEAT: If you start an initial sync and a snapshot exists already -- if that
   snapshot is old, you'll likely have a long 2nd sync run. Keep this in mind
   when doing initial syncs (do a 2nd one immediately after?). (Document?)
+
+* Document somewhere about lessons learnt:
+  - you should use unique zfspool storage names, even if they are local only:
+    don't use ``tank`` on all PVE nodes, but use ``tank/nodeX`` on ``nodeX``
+    (if you ever want to make the ``tank/nodeY`` disk available through NFS or
+    whatever, you can);
+  - don't forget to not share local-only datastorage: select the nodes on which
+    they are available only.
