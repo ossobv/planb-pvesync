@@ -60,7 +60,13 @@ class _FilesystemBase(_SystemCalls):
 
     def ensure_parent_exists(self):
         assert '/' in self._fs_name, self._fs_name
-        self.zfs_exec('zfs', 'create', '-p', self._fs_name.rsplit('/', 1)[0])
+        self.zfs_exec(
+            # mountpoint=none because we plan to put ZVOLs in here; they're not
+            # accessed through a mount anyway. If we were to load filesystems
+            # here, we wouldn't touch mountpoint, but do an unmount after
+            # syncing instead.
+            'zfs', 'create', '-o', 'mountpoint=none', '-p',
+            self._fs_name.rsplit('/', 1)[0])
 
     def make_snapshot(self, snapshot_name):
         # FIXME: validate snapshot_name for illegal chars..?
